@@ -1,0 +1,64 @@
+<html>
+
+<head>
+    <!--script src="web3.js"></script-->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script>
+        const address = '0xE6466b77AD8Ec740bB171a836792443EE0b8EdCf'
+        //--------------------------------
+        // No longer supported (start from Nov 20, 2020)
+        //const provider = window.web3.currentProvider;
+        //const web3 = new Web3(provider);
+        //--------------------------------
+
+        const web3 = new Web3(Web3.givenProvider);
+       
+        window.addEventListener('load', async () => {
+            if(typeof(web3) === 'undefined') {
+                //return console.log("Metamask is not installed");
+                alert("Metamask is not installed, you cannot use this app")
+            }
+            else {
+                window.ethereum.enable();
+                await getAccounts()
+            }
+      
+        });
+        
+        const abi = JSON.parse(fs.readFileSync('./build/__contracts_lottery_sol_Lottery.abi'));
+        
+        var greetings = new web3.eth.Contract(abi, address);
+        var accounts;
+        async function getAccounts() {
+            accounts = await web3.eth.getAccounts()
+            document.getElementById('status').innerHTML = accounts[0]    
+        }
+        const setMessage = async() => {
+            message = document.getElementById("newMessage").value
+            document.getElementById('status').innerHTML = 'Please wait for processing your request'
+            await greetings.methods.setMessage(message).send({ from: accounts[0], gas: 40000 })
+            document.getElementById('status').innerHTML = 'your message is set'
+        }
+        const getMessage = async() => {
+                    message = await greetings.methods.message().call()
+            document.getElementById('message').innerHTML = message
+
+        }
+         
+    </script>
+</head>
+<body>
+    <h2> Greeting App </h2>
+    <label>Enter Message</label>
+    <input type="text" id = "newMessage"/>
+    <button type='button' onclick='setMessage()'> Set Message </button>
+    <button type='button' onclick='getMessage()'> Get Message </button>
+    <hr>
+    <div id="status"></div>
+    <hr>
+    <div id="message"></div>
+    <br>
+    
+</body>
+
+</html>
